@@ -32,9 +32,10 @@ export BitPat
 
 function encode(e::ScalarEncoder, n::Number)
 	BitPat(e.n,n)
-	
 end
 export encode
+
+
 
 function Base.show(io::IO, m::BitPat)
 	print(io,"[")
@@ -43,6 +44,56 @@ function Base.show(io::IO, m::BitPat)
 	end
 	print(io," ]")
 end
+
+function getWidth(e::ScalarEncoder)
+	e.n
+end
+export getWidth
+
+function getDescription(e::ScalarEncoder)
+	e.name
+end
+export getDescription
+
+function getBucketIndices(e::ScalarEncoder)
+
+end
+export getBucketIndices
+
+function encodeIntoArray(e::ScalarEncoder)
+
+end
+export encodeIntoArray
+
+function decode(e::ScalarEncoder)
+
+end
+export decode
+
+function getBucketValues(e::ScalarEncoder)
+
+end
+export getBucketValues
+
+function getBucketInfo(e::ScalarEncoder)
+
+end
+export getBucketInfo
+
+function topDownCompute(e::ScalarEncoder)
+
+end
+export topDownCompute
+
+function closenessScores(e::ScalarEncoder)
+
+end
+export closenessScores
+
+
+
+
+
 
 
 end # module
