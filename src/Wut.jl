@@ -31,11 +31,9 @@ end
 export BitPat
 
 function encode(e::ScalarEncoder, n::Number)
-	BitPat(e.n,n)
+	encodeIntoArray(e, n, BitPat(e.n,n))
 end
 export encode
-
-
 
 function Base.show(io::IO, m::BitPat)
 	print(io,"[")
@@ -60,8 +58,9 @@ function getBucketIndices(e::ScalarEncoder)
 end
 export getBucketIndices
 
-function encodeIntoArray(e::ScalarEncoder)
-
+function encodeIntoArray(e::ScalarEncoder,n::Number,b::BitPat;learn=true)
+	fill!(b.b,false)
+	b
 end
 export encodeIntoArray
 
