@@ -1,110 +1,113 @@
 # included in module Wut
 
+INITIAL_BUCKETS = 1000  # must be an even positive integer
 
-struct ScalarEncoder 
+struct RandomDistributedScalarEncoder 
 
-	w::Number            # width of the contiguous 1 bits, must be odd
-	minval::Number       # minimum value of input signal
-	maxval::Number       # maximum value of input signal (strictly less when periodic = true)
-	periodic::Bool       # input values wrap around and maxval input is mapped onto minval
-	n::Number            # output bit width (must be greater than w)
-	radius::Number       # input value difference > radius do not overlap bits
-	resolution::Number   # input value difference >= resolution do not give identical bits
-	name::AbstractString # optional descriptive string
-	verbosity::Number 
-	clipInput::Bool      # Non-periodic inputs are clipped to minval / maxval
-	forced::Bool         # skip some safety checks
-    padding::Number
+    w::Int64             # width of the contiguous 1 bits, must be odd
+    minIndex::Int64      
+    maxIndex::Int64      
+    offset::Float64  
+    oidx::Int64
+    n::Int64             # output bit width (must be greater than w)
+    resolution::Float64  # input value difference >= resolution do not give identical bits
+    name::AbstractString # optional descriptive string
+    verbosity::Int64
+    maxoverlap::Int64
+    random::MersenneTwister
+    bucketmap::Dict{Int64,Vector{Int64}}
+    numTries::Int64
+    maxBuckets::Int64
 
-
-    function ScalarEncoder(;w=0,minval=0,maxval=0,periodic=false,
-				n=0,radius=0,resolution=1,name="",
-				verbosity=0,clipInput=false,forced=false,padding=0)
-        res=(maxval-minval)/n
-		new(w,minval,maxval,periodic,n,w*res,res,name,verbosity,clipInput,forced,periodic?0:(w-1)/2)
+    function RandomDistributedScalarEncoder(;resolution=0.0,w=21,n=400,name="",offset=-1.0,seed=42,verbosity=0)
         
-        
-end
+        minIndex = maxIndex = INITIAL_BUCKETS/2
+        mao=2
+        bm = Dict{Int64,Vector{Int64}}()
+        rng=MersenneTwister(seed)
+        t=shuffle(Vector(1:n))
+        bm[minIndex]=t[1:w]
+        new(w,minIndex,maxIndex,offset,0,n,resolution,name,verbosity,mao,rng,bm,0,INITIAL_BUCKETS)
+    end
 
 end
-export ScalarEncoder
+export RandomDistributedScalarEncoder
 
-#struct BitPat
-#	e::Unsigned
-#	b::BitArray{1}
-#	BitPat(e,b) = new(e,BitArray(e))
-#end
-#export BitPat
-
-function encode(e::ScalarEncoder, n::Number)
-	encodeIntoArray(e, n, BitPat(e.n,n))
+function encode(e::RandomDistributedScalarEncoder, n::Number)
+    encodeIntoArray(e, n, BitPat(e.n,n))
 end
 export encode
 
-#function Base.show(io::IO, m::BitPat)
-#	print(io,"[")
-#	for (i,v) in enumerate(m.b)
-#		v ? print(io," 1") : print(io," 0")
-#	end
-#	print(io," ]")
-#end
-
-function getWidth(e::ScalarEncoder)
-	e.n
+function getWidth(e::RandomDistributedScalarEncoder)
+    e.n
 end
 export getWidth
 
-function getDescription(e::ScalarEncoder)
-	e.name
+function getDescription(e::RandomDistributedScalarEncoder)
+    e.name
 end
 export getDescription
 
-function getBucketIndices(e::ScalarEncoder)
+function getBucketIndices(e::RandomDistributedScalarEncoder,x::Float64)
 
+    if e.offset==-1.0
+        e.offset=convert(Float64,x)
+    end
+
+    bucketIdx = ((e.maxBuckets/2) + convert(Int64,round((x - e.offset) / e.resolution)))
+
+    if bucketIdx < 1
+      bucketIdx = 1
+    elseif bucketIdx >= e.maxBuckets
+      bucketIdx = e.maxBuckets
+    end
+    bucketIdx
 end
 export getBucketIndices
 
-function encodeIntoArray(e::ScalarEncoder,n::Number,b::BitPat;learn=true)
-	fill!(b.b,false)
-	t1 = e.periodic ? n % e.maxval : n
-	t2 = t1 > e.maxval ? e.maxval : t1
-	t = t2 < e.minval ? e.minval : t2
+function encodeIntoArray(e::RandomDistributedScalarEncoder,n::Number,b::BitPat;learn=true)
+    fill!(b.b,false)
     
-    c = convert(Int64,round((((t - e.minval) + e.resolution/2) / e.resolution )))# + e.padding))
     
-#	i=convert(Int64,round(t*e.n/e.maxval))
-    d=convert(Int64,(e.w-1)/2)
-    for i = c-d : c+d
-	  if i <= e.n && i > 0
+    idx=getBucketIndices(e,convert(Float64,n))
+    
+    if ! haskey(e.bucketmap,idx)
+        t=shuffle(Vector(1:e.n))
+        e.bucketmap[idx]=t[1:e.w]
+    end
+        
+    
+    for i in e.bucketmap[idx]
+    
         b.b[i]=true
-      end
+    
     end
     
-	b
+    b
 end
 export encodeIntoArray
 
-function decode(e::ScalarEncoder)
+function decode(e::RandomDistributedScalarEncoder)
 
 end
 export decode
 
-function getBucketValues(e::ScalarEncoder)
+function getBucketValues(e::RandomDistributedScalarEncoder)
 
 end
 export getBucketValues
 
-function getBucketInfo(e::ScalarEncoder)
+function getBucketInfo(e::RandomDistributedScalarEncoder)
 
 end
 export getBucketInfo
 
-function topDownCompute(e::ScalarEncoder)
+function topDownCompute(e::RandomDistributedScalarEncoder)
 
 end
 export topDownCompute
 
-function closenessScores(e::ScalarEncoder)
+function closenessScores(e::RandomDistributedScalarEncoder)
 
 end
 export closenessScores
