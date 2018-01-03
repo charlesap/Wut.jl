@@ -1,110 +1,95 @@
 # included in module Wut
 
 
-struct ScalarEncoder 
+struct DateEncoder 
 
-	w::Number            # width of the contiguous 1 bits, must be odd
-	minval::Number       # minimum value of input signal
-	maxval::Number       # maximum value of input signal (strictly less when periodic = true)
-	periodic::Bool       # input values wrap around and maxval input is mapped onto minval
-	n::Number            # output bit width (must be greater than w)
-	radius::Number       # input value difference > radius do not overlap bits
-	resolution::Number   # input value difference >= resolution do not give identical bits
-	name::AbstractString # optional descriptive string
-	verbosity::Number 
-	clipInput::Bool      # Non-periodic inputs are clipped to minval / maxval
-	forced::Bool         # skip some safety checks
-    padding::Number
+    season::Number
+    dayOfWeek::Number
+    weekend::Number
+    holiday::Number
+    timeOfDay::Number
+    customDays::Number
+    name::AbstractString
+    forced::Bool
 
+    w::Number            # width of the contiguous 1 bits, must be odd
+    n::Number     
 
-    function ScalarEncoder(;w=0,minval=0,maxval=0,periodic=false,
-				n=0,radius=0,resolution=1,name="",
-				verbosity=0,clipInput=false,forced=false,padding=0)
-        res=(maxval-minval)/n
-		new(w,minval,maxval,periodic,n,w*res,res,name,verbosity,clipInput,forced,periodic?0:(w-1)/2)
+    seasonEncoder::Nullable{ScalarEncoder}
+    dayOfWeekEncoder::Nullable{ScalarEncoder}
+    weekendEncoder::Nullable{ScalarEncoder}
+    holidayEncoder::Nullable{ScalarEncoder}
+    timeOfDayEncoder::Nullable{ScalarEncoder}
+    customDaysEncoder::Nullable{ScalarEncoder}
+           # output bit width (must be greater than w)
+
+    function DateEncoder(;season=0, dayOfWeek=0, weekend=0, holiday=0, timeOfDay=0, customDays=0, name = "", forced=true)
+        w=3
+        n=21
+        z=Nullable{ScalarEncoder}()
+        sE=Nullable{ScalarEncoder}()
+        sE = season== 0 ? z : ScalarEncoder(w = season, minval=0, maxval=366,
+                                         radius=91.5, periodic=true,
+                                         name="season", forced=forced)
+    
+        new(season, dayOfWeek, weekend, holiday, timeOfDay, customDays, name, forced, w, n, sE, z, z, z, z, z)
         
         
-end
+        
+    end
 
 end
-export ScalarEncoder
+export DateEncoder
 
-#struct BitPat
-#	e::Unsigned
-#	b::BitArray{1}
-#	BitPat(e,b) = new(e,BitArray(e))
-#end
-#export BitPat
 
-function encode(e::ScalarEncoder, n::Number)
-	encodeIntoArray(e, n, BitPat(e.n,n))
+function encode(e::DateEncoder, d::AbstractString)
+    encodeIntoArray(e, d, BitPat(e.n,d))
 end
 export encode
 
-#function Base.show(io::IO, m::BitPat)
-#	print(io,"[")
-#	for (i,v) in enumerate(m.b)
-#		v ? print(io," 1") : print(io," 0")
-#	end
-#	print(io," ]")
-#end
-
-function getWidth(e::ScalarEncoder)
-	e.n
+function getWidth(e::DateEncoder)
+    e.n
 end
 export getWidth
 
-function getDescription(e::ScalarEncoder)
-	e.name
+function getDescription(e::DateEncoder)
+    e.name
 end
 export getDescription
 
-function getBucketIndices(e::ScalarEncoder)
+function getBucketIndices(e::DateEncoder)
 
 end
 export getBucketIndices
 
-function encodeIntoArray(e::ScalarEncoder,n::Number,b::BitPat;learn=true)
-	fill!(b.b,false)
-	t1 = e.periodic ? n % e.maxval : n
-	t2 = t1 > e.maxval ? e.maxval : t1
-	t = t2 < e.minval ? e.minval : t2
+function encodeIntoArray(e::DateEncoder,d::AbstractString,b::BitPat;learn=true)
+    fill!(b.b,false)
     
-    c = convert(Int64,round((((t - e.minval) + e.resolution/2) / e.resolution )))# + e.padding))
-    
-#	i=convert(Int64,round(t*e.n/e.maxval))
-    d=convert(Int64,(e.w-1)/2)
-    for i = c-d : c+d
-	  if i <= e.n && i > 0
-        b.b[i]=true
-      end
-    end
-    
-	b
+    b
 end
 export encodeIntoArray
 
-function decode(e::ScalarEncoder)
+function decode(e::DateEncoder)
 
 end
 export decode
 
-function getBucketValues(e::ScalarEncoder)
+function getBucketValues(e::DateEncoder)
 
 end
 export getBucketValues
 
-function getBucketInfo(e::ScalarEncoder)
+function getBucketInfo(e::DateEncoder)
 
 end
 export getBucketInfo
 
-function topDownCompute(e::ScalarEncoder)
+function topDownCompute(e::DateEncoder)
 
 end
 export topDownCompute
 
-function closenessScores(e::ScalarEncoder)
+function closenessScores(e::DateEncoder)
 
 end
 export closenessScores

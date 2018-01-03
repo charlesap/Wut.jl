@@ -2,28 +2,28 @@
 
 INITIAL_BUCKETS = 1000  # must be an even positive integer
 
-struct RandomDistributedScalarEncoder 
+mutable struct RandomDistributedScalarEncoder 
 
-    w::Int64             # width of the contiguous 1 bits, must be odd
-    minIndex::Int64      
-    maxIndex::Int64      
+    w::Int32             # width of the contiguous 1 bits, must be odd
+    minIndex::Int32      
+    maxIndex::Int32      
     offset::Float64  
-    oidx::Int64
-    n::Int64             # output bit width (must be greater than w)
+    oidx::Int32
+    n::Int32             # output bit width (must be greater than w)
     resolution::Float64  # input value difference >= resolution do not give identical bits
     name::AbstractString # optional descriptive string
-    verbosity::Int64
-    maxoverlap::Int64
+    verbosity::Int32
+    maxoverlap::Int32
     random::MersenneTwister
-    bucketmap::Dict{Int64,Vector{Int64}}
-    numTries::Int64
-    maxBuckets::Int64
+    bucketmap::Dict{Int32,Vector{Int32}}
+    numTries::Int32
+    maxBuckets::Int32
 
-    function RandomDistributedScalarEncoder(;resolution=0.0,w=21,n=400,name="",offset=-1.0,seed=42,verbosity=0)
+    function RandomDistributedScalarEncoder(;resolution=0.0,w=21,n=400,name="",offset=NaN,seed=42,verbosity=0)
         
         minIndex = maxIndex = INITIAL_BUCKETS/2
         mao=2
-        bm = Dict{Int64,Vector{Int64}}()
+        bm = Dict{Int32,Vector{Int32}}()
         rng=MersenneTwister(seed)
         t=shuffle(Vector(1:n))
         bm[minIndex]=t[1:w]
@@ -48,13 +48,66 @@ function getDescription(e::RandomDistributedScalarEncoder)
 end
 export getDescription
 
+function repOK(e::RandomDistributedScalarEncoder,v::Vector)
+   true 
+end
+
+function newRepresentation(e::RandomDistributedScalarEncoder, nidx::Int32, idx::Int32)
+    
+    
+    t=shuffle(Vector(1:e.n))
+    x=shuffle(e.bucketmap[idx])
+    n=vcat(t[1],x[2:e.w])
+    while ! repOK(e,n) 
+        t=shuffle(Vector(1:e.n))
+        x=shuffle(e.bucketmap[idx])
+        n=vcat(t[1],x[2:e.w])
+    end
+    n
+
+end
+
+function createBucket(e::RandomDistributedScalarEncoder, idx::Int32)
+    
+    z=convert(Int32,0)
+    if idx < e.minIndex
+        z=e.minIndex
+        if idx == e.minIndex - 1
+            e.minIndex-=1
+        else
+            createBucket(e,convert(Int32,idx+1))
+        end
+    else
+        z=e.maxIndex
+        if idx == e.maxIndex + 1
+            e.maxIndex+=1
+        else
+            createBucket(e,convert(Int32,idx-1))
+        end
+    end
+    
+    e.bucketmap[idx]=newRepresentation(e,idx,z)
+    
+end
+
+function mapBucketIndexToNonZeroBits(e::RandomDistributedScalarEncoder, index::Int32)
+    
+    idx = index < 1 ? 1 : ( index > e.maxBuckets ? e.maxBuckets : index )
+
+    if ! haskey(e.bucketmap,idx)
+        createBucket(e,idx)
+    end
+    
+    e.bucketmap[idx]
+end
+    
 function getBucketIndices(e::RandomDistributedScalarEncoder,x::Float64)
 
-    if e.offset==-1.0
+    if isnan(e.offset)
         e.offset=convert(Float64,x)
     end
 
-    bucketIdx = ((e.maxBuckets/2) + convert(Int64,round((x - e.offset) / e.resolution)))
+    bucketIdx = convert(Int32,((e.maxBuckets/2) + convert(Int32,round((x - e.offset) / e.resolution))))
 
     if bucketIdx < 1
       bucketIdx = 1
@@ -71,16 +124,10 @@ function encodeIntoArray(e::RandomDistributedScalarEncoder,n::Number,b::BitPat;l
     
     idx=getBucketIndices(e,convert(Float64,n))
     
-    if ! haskey(e.bucketmap,idx)
-        t=shuffle(Vector(1:e.n))
-        e.bucketmap[idx]=t[1:e.w]
-    end
-        
+    nzb=mapBucketIndexToNonZeroBits(e,idx)
     
-    for i in e.bucketmap[idx]
-    
+    for i in nzb
         b.b[i]=true
-    
     end
     
     b
