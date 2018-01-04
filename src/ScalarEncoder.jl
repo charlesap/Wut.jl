@@ -42,12 +42,8 @@ struct ScalarEncoder
         end
     
         if n == 0
-            if periodic
-              range = rangeInternal
-            else
-              range = rangeInternal + res
-            end
-            nfloat = w * (range / rad) + 2 * padding
+            rag = periodic ? maxval-minval : maxval-minval+res
+            nfloat = w * (rag / rad) + 2 * padding
             n = Int32(ceil(nfloat))        
         end
     
