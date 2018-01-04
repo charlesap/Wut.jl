@@ -16,23 +16,73 @@ struct DateEncoder
     n::Number     
 
     seasonEncoder::Nullable{ScalarEncoder}
+    seasonOffset::Int64
+
     dayOfWeekEncoder::Nullable{ScalarEncoder}
+    dayOfWeekOffset::Int64
+
     weekendEncoder::Nullable{ScalarEncoder}
+    weekendOffset::Int64
+
     holidayEncoder::Nullable{ScalarEncoder}
+    holidayOffset::Int64
+
     timeOfDayEncoder::Nullable{ScalarEncoder}
+    timeOfDayOffset::Int64
+
     customDaysEncoder::Nullable{ScalarEncoder}
-           # output bit width (must be greater than w)
+    customDaysOffset::Int64
+          
 
     function DateEncoder(;season=0, dayOfWeek=0, weekend=0, holiday=0, timeOfDay=0, customDays=0, name = "", forced=true)
-        w=3
-        n=21
+        w=0
+        n=0
         z=Nullable{ScalarEncoder}()
+    
         sE=Nullable{ScalarEncoder}()
         sE = season== 0 ? z : ScalarEncoder(w = season, minval=0, maxval=366,
                                          radius=91.5, periodic=true,
                                          name="season", forced=forced)
+        n=isnull(sE) ? 0 : getWidth(sE)
+        sEo=0
     
-        new(season, dayOfWeek, weekend, holiday, timeOfDay, customDays, name, forced, w, n, sE, z, z, z, z, z)
+        dE=Nullable{ScalarEncoder}()
+        dE = dayOfWeek== 0 ? z : ScalarEncoder(w = dayOfWeek, minval=0, maxval=7,
+                                         radius=1, periodic=true,
+                                         name="day of week", forced=forced)
+        n=isnull(dE) ? n : n + getWidth(dE)
+        dEo=n
+    
+        wE=Nullable{ScalarEncoder}()
+        wE = weekend== 0 ? z : ScalarEncoder(w = weekend, minval=0, maxval=2,
+                                         radius=1, periodic=true,
+                                         name="weekend", forced=forced)
+        n=isnull(wE) ? n : n + getWidth(wE)
+        wEo=n
+    
+        cE=Nullable{ScalarEncoder}()
+        cE = customDays== 0 ? z : ScalarEncoder(w = customDays, minval=0, maxval=7,
+                                         radius=1, periodic=true,
+                                         name="custom days", forced=forced)
+        n=isnull(cE) ? n : n + getWidth(cE)
+        cEo=n
+    
+        hE=Nullable{ScalarEncoder}()
+        hE = holiday== 0 ? z : ScalarEncoder(w = holiday, minval=0, maxval=7,
+                                         radius=1, periodic=true,
+                                         name="holiday", forced=forced)
+        n=isnull(hE) ? n : n + getWidth(hE)
+        hEo=n
+    
+        tE=Nullable{ScalarEncoder}()
+        tE = timeOfDay== 0 ? z : ScalarEncoder(w = timeOfDay, minval=0, maxval=7,
+                                         radius=1, periodic=true,
+                                         name="time of day", forced=forced)
+        n=isnull(tE) ? n : n + getWidth(tE)
+        tEo=n
+    
+            new(season, dayOfWeek, weekend, holiday, timeOfDay, customDays, name, forced, 
+                 w, n, sE, sEo, dE, dEo, wE, wEo, hE, hEo, tE, tEo, cE, cEo)
         
         
         

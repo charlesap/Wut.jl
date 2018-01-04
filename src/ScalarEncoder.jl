@@ -30,12 +30,25 @@ struct ScalarEncoder
            rag = periodic ? maxval-minval : maxval-minval+res
 
         elseif n == 0 && radius != 0.0 && resolution == 0.0
-           
+           rad = radius
+           res = radius / w
+          
         elseif n == 0 && radius == 0.0 && resolution != 0.0
            res = resolution
+           rad = res * w
 
         else
            
+        end
+    
+        if n == 0
+            if periodic
+              range = rangeInternal
+            else
+              range = rangeInternal + res
+            end
+            nfloat = w * (range / rad) + 2 * padding
+            n = Int32(ceil(nfloat))        
         end
     
         pad = periodic ? 0 : convert(Int64,round((w-1)/2))
