@@ -12,7 +12,7 @@ struct DateEncoder
     name::AbstractString
     forced::Bool
 
-    w::Number            # width of the contiguous 1 bits, must be odd
+    w::Number            # width of the discontiguous 1 bits
     n::Number     
 
     seasonEncoder::Nullable{ScalarEncoder}
@@ -92,7 +92,7 @@ end
 export DateEncoder
 
 
-function encode(e::DateEncoder, d::AbstractString)
+function encode(e::DateEncoder, d::DateTime)
     encodeIntoArray(e, d, BitPat(e.n,d))
 end
 export encode
@@ -112,7 +112,7 @@ function getBucketIndices(e::DateEncoder)
 end
 export getBucketIndices
 
-function encodeIntoArray(e::DateEncoder,d::AbstractString,b::BitPat;learn=true)
+function encodeIntoArray(e::DateEncoder,d::DateTime,b::BitPat;learn=true)
     fill!(b.b,false)
     
     b
