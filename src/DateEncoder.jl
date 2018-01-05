@@ -12,8 +12,8 @@ struct DateEncoder
     name::AbstractString
     forced::Bool
 
-    w::Number            # width of the discontiguous 1 bits
-    n::Number     
+    w::Number            # cumulative width of the discontiguous 1 bits
+    n::Number            # width of composite encoding
 
     seasonEncoder::Nullable{ScalarEncoder}
     seasonOffset::Int64
@@ -50,36 +50,36 @@ struct DateEncoder
         dE = dayOfWeek== 0 ? z : ScalarEncoder(w = dayOfWeek, minval=0, maxval=7,
                                          radius=1, periodic=true,
                                          name="day of week", forced=forced)
-        n=isnull(dE) ? n : n + getWidth(dE)
         dEo=n
+        n=isnull(dE) ? n : n + getWidth(dE)
     
         wE=Nullable{ScalarEncoder}()
         wE = weekend== 0 ? z : ScalarEncoder(w = weekend, minval=0, maxval=2,
                                          radius=1, periodic=true,
                                          name="weekend", forced=forced)
-        n=isnull(wE) ? n : n + getWidth(wE)
         wEo=n
+        n=isnull(wE) ? n : n + getWidth(wE)
     
         cE=Nullable{ScalarEncoder}()
         cE = customDays== 0 ? z : ScalarEncoder(w = customDays, minval=0, maxval=7,
                                          radius=1, periodic=true,
                                          name="custom days", forced=forced)
-        n=isnull(cE) ? n : n + getWidth(cE)
         cEo=n
+        n=isnull(cE) ? n : n + getWidth(cE)
     
         hE=Nullable{ScalarEncoder}()
         hE = holiday== 0 ? z : ScalarEncoder(w = holiday, minval=0, maxval=7,
                                          radius=1, periodic=true,
                                          name="holiday", forced=forced)
-        n=isnull(hE) ? n : n + getWidth(hE)
         hEo=n
+        n=isnull(hE) ? n : n + getWidth(hE)
     
         tE=Nullable{ScalarEncoder}()
         tE = timeOfDay== 0 ? z : ScalarEncoder(w = timeOfDay, minval=0, maxval=7,
                                          radius=1, periodic=true,
                                          name="time of day", forced=forced)
-        n=isnull(tE) ? n : n + getWidth(tE)
         tEo=n
+        n=isnull(tE) ? n : n + getWidth(tE)
     
             new(season, dayOfWeek, weekend, holiday, timeOfDay, customDays, name, forced, 
                  w, n, sE, sEo, dE, dEo, wE, wEo, hE, hEo, tE, tEo, cE, cEo)
