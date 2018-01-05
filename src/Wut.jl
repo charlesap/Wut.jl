@@ -4,7 +4,7 @@ include("BitPat.jl")
 include("ScalarEncoder.jl")
 
 #include("AdaptiveScalarEncoder.jl")
-#include("CategoryEncoder.jl")
+include("CategoryEncoder.jl")
 #include("CoordinateEncoder.jl")
 include("DateEncoder.jl")
 #include("DeltaEncoder.jl")
