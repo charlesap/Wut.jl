@@ -118,7 +118,7 @@ function getBucketIndices(e::RandomDistributedScalarEncoder,x::Float64)
 end
 export getBucketIndices
 
-function encodeIntoArray(e::RandomDistributedScalarEncoder,n::Number,b::BitPat;learn=true)
+function encodeIntoArray(e::RandomDistributedScalarEncoder,n::Number,b::BitPat;learn=true, offset=0, length=0)
     fill!(b.b,false)
     
     

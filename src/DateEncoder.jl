@@ -15,23 +15,23 @@ struct DateEncoder
     w::Number            # cumulative width of the discontiguous 1 bits
     n::Number            # width of composite encoding
 
-    seasonEncoder::Nullable{ScalarEncoder}
-    seasonOffset::Int64
+    sE::Nullable{ScalarEncoder} # SeasonEncoder
+    sEo::Int64
 
-    dayOfWeekEncoder::Nullable{ScalarEncoder}
-    dayOfWeekOffset::Int64
+    dE::Nullable{ScalarEncoder} # dayOfWeekEncoder
+    dEo::Int64
 
-    weekendEncoder::Nullable{ScalarEncoder}
-    weekendOffset::Int64
+    wE::Nullable{ScalarEncoder} # weekendEncoder
+    wEo::Int64
 
-    holidayEncoder::Nullable{ScalarEncoder}
-    holidayOffset::Int64
+    hE::Nullable{ScalarEncoder} # holidayEncoder
+    hEo::Int64
 
-    timeOfDayEncoder::Nullable{ScalarEncoder}
-    timeOfDayOffset::Int64
+    tE::Nullable{ScalarEncoder} # timeOfDayEncoder
+    tEo::Int64
 
-    customDaysEncoder::Nullable{ScalarEncoder}
-    customDaysOffset::Int64
+    cE::Nullable{ScalarEncoder} # customDaysEncoder
+    cEo::Int64
           
 
     function DateEncoder(;season=0, dayOfWeek=0, weekend=0, holiday=0, timeOfDay=0, customDays=0, name = "", forced=true)
@@ -112,8 +112,36 @@ function getBucketIndices(e::DateEncoder)
 end
 export getBucketIndices
 
-function encodeIntoArray(e::DateEncoder,d::DateTime,b::BitPat;learn=true)
+function encodeIntoArray(e::DateEncoder,d::DateTime,b::BitPat;learn=true, offset=0, length=0)
     fill!(b.b,false)
+    
+    timeOfDay=0    
+    
+    if ! isnull(e.sE) # seasson
+        dy=Dates.dayofyear(d)
+        b.b[e.sEo+1]=true
+        encodeIntoArray(get(e.sE),dy-1,b,learn = true, offset = e.sEo)
+    end
+    if ! isnull(e.dE) # day of week
+        dw=Dates.dayofweek(d)
+        b.b[e.dEo+1]=true
+        encodeIntoArray(get(e.dE),dw-1,b,learn = true, offset = e.dEo)
+    end
+    if ! isnull(e.wE) # weekend
+        weekend = 0
+        b.b[e.wEo+1]=true
+    end
+    if ! isnull(e.hE) # holiday
+        isholiday = 0
+        b.b[e.hEo+1]=true
+    end
+    if ! isnull(e.tE) # time of day
+        b.b[e.tEo+1]=true
+    end
+    if ! isnull(e.cE) # custom days
+        customDay = 0
+        b.b[e.cEo+1]=true
+    end
     
     b
 end

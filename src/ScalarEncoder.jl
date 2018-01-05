@@ -76,8 +76,11 @@ function getBucketIndices(e::ScalarEncoder)
 end
 export getBucketIndices
 
-function encodeIntoArray(e::ScalarEncoder,n::Number,b::BitPat;learn=true)
-    fill!(b.b,false)
+function encodeIntoArray(e::ScalarEncoder,n::Number,b::BitPat;learn=true, offset=0, length=0)
+    #fill!(b.b,false)
+    for i = 1 : e.n
+       b.b[i+offset]=false 
+    end
     t1 = e.periodic ? n % e.maxval : n
     t2 = t1 > e.maxval ? e.maxval : t1
     t = t2 < e.minval ? e.minval : t2
@@ -87,7 +90,7 @@ function encodeIntoArray(e::ScalarEncoder,n::Number,b::BitPat;learn=true)
 
     for i = 1+c-d : 1+c+d
       if i <= e.n && i > 0
-        b.b[i]=true
+        b.b[i+offset]=true
       end
     end
     
