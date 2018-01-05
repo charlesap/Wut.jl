@@ -137,6 +137,7 @@ function encodeIntoArray(e::DateEncoder,d::DateTime,b::BitPat;learn=true, offset
     end
     if ! isnull(e.tE) # time of day
         b.b[e.tEo+1]=true
+        encodeIntoArray(get(e.tE),timeOfDay,b,learn = true, offset = e.tEo)
     end
     if ! isnull(e.cE) # custom days
         customDay = 0
