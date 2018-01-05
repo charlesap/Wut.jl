@@ -114,8 +114,8 @@ export getBucketIndices
 
 function encodeIntoArray(e::DateEncoder,d::DateTime,b::BitPat;learn=true, offset=0, length=0)
     fill!(b.b,false)
-    
-    timeOfDay=0    
+
+    timeOfDay=convert(Float32,Dates.value(Dates.Hour(d)))   
     
     if ! isnull(e.sE) # seasson
         dy=Dates.dayofyear(d)
@@ -123,7 +123,7 @@ function encodeIntoArray(e::DateEncoder,d::DateTime,b::BitPat;learn=true, offset
         encodeIntoArray(get(e.sE),dy-1,b,learn = true, offset = e.sEo)
     end
     if ! isnull(e.dE) # day of week
-        dw=Dates.dayofweek(d)
+        dw=convert(Float32,Dates.dayofweek(d))+(timeOfDay/24)
         b.b[e.dEo+1]=true
         encodeIntoArray(get(e.dE),dw-1,b,learn = true, offset = e.dEo)
     end
