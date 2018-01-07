@@ -1,29 +1,25 @@
 # included in module Wut
 
 
-struct CategoryEncoder 
-    cL::AbstractArray
+struct CategoryEncoder  <: AbstractEncoder
+    cL::Dict{String,Int64}
     sE::ScalarEncoder
 
 
     function CategoryEncoder(;w=0, categoryList=(), forced=false)
-        cL=categoryList
         
-        e=ScalarEncoder(w = w, minval=0, maxval=length(cL),
+        tcL=Dict(categoryList[i] => i for i = 1:length(categoryList))
+        #println(tcL)
+    
+        e=ScalarEncoder(w = w, minval=0, maxval=length(categoryList),
                       radius=1, periodic=false, forced=forced)
-        new(cL,e)
+        new(tcL,e)
         
         
 end
 
 end
 export CategoryEncoder
-
-
-function encode(e::CategoryEncoder, n::AbstractString)
-    encodeIntoArray(e, n, BitPat(e.sE.n,n))
-end
-export encode
 
 
 function getWidth(e::CategoryEncoder)

@@ -1,7 +1,7 @@
 # included in module Wut
 
 
-struct ScalarEncoder 
+struct ScalarEncoder <: AbstractEncoder
 
     w::Int64             # width of the contiguous 1 bits, must be odd
     minval::Float64      # minimum value of input signal
@@ -54,12 +54,6 @@ struct ScalarEncoder
 
 end
 export ScalarEncoder
-
-function encode(e::ScalarEncoder, n::Number)
-    encodeIntoArray(e, n, BitPat(e.n,n))
-end
-export encode
-
 
 function getWidth(e::ScalarEncoder)
     e.n

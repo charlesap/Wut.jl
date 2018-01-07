@@ -1,6 +1,16 @@
 module Wut
 
 include("BitPat.jl")
+
+abstract type AbstractEncoder
+end
+
+function encode(a::AbstractEncoder, v)
+    encodeIntoArray(a, v, BitPat(getWidth(a)))
+end
+export encode
+
+
 include("ScalarEncoder.jl")
 
 #include("AdaptiveScalarEncoder.jl")

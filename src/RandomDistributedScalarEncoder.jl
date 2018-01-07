@@ -2,7 +2,7 @@
 
 INITIAL_BUCKETS = 1000  # must be an even positive integer
 
-mutable struct RandomDistributedScalarEncoder 
+mutable struct RandomDistributedScalarEncoder  <: AbstractEncoder
 
     w::Int32             # width of the contiguous 1 bits, must be odd
     minIndex::Int32      
@@ -32,11 +32,6 @@ mutable struct RandomDistributedScalarEncoder
 
 end
 export RandomDistributedScalarEncoder
-
-function encode(e::RandomDistributedScalarEncoder, n::Number)
-    encodeIntoArray(e, n, BitPat(e.n,n))
-end
-export encode
 
 function getWidth(e::RandomDistributedScalarEncoder)
     e.n

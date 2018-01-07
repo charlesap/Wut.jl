@@ -1,7 +1,7 @@
 # included in module Wut
 
 
-struct DateEncoder 
+struct DateEncoder  <: AbstractEncoder
 
     season::Number
     dayOfWeek::Number
@@ -90,12 +90,6 @@ struct DateEncoder
 
 end
 export DateEncoder
-
-
-function encode(e::DateEncoder, d::DateTime)
-    encodeIntoArray(e, d, BitPat(e.n,d))
-end
-export encode
 
 function getWidth(e::DateEncoder)
     e.n
