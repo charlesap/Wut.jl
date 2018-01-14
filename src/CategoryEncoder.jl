@@ -9,7 +9,7 @@ struct CategoryEncoder  <: AbstractEncoder
     function CategoryEncoder(;w=0, categoryList=(), forced=false)
         
         tcL=Dict(categoryList[i] => i for i = 1:length(categoryList))
-        #println(tcL)
+            #println(tcL)
     
         e=ScalarEncoder(w = w, minval=0, maxval=length(categoryList),
                       radius=1, periodic=false, forced=forced)
@@ -37,14 +37,19 @@ function getBucketIndices(e::CategoryEncoder)
 end
 export getBucketIndices
 
-function encodeIntoArray(e::CategoryEncoder,n::AbstractString,b::BitPat;learn=true)
+function encodeIntoArray(e::CategoryEncoder,n::Void,b::BitPat;learn=true)
     fill!(b.b,false)
+    b
+end
+function encodeIntoArray(e::CategoryEncoder,n::AbstractString,b::BitPat;learn=true)
+    t=get(e.cL,n,0)
+    encodeIntoArray(e.sE,convert(Int32,t),b)
     
     b
 end
 export encodeIntoArray
 
-function decode(e::CategoryEncoder)
+function decode(e::CategoryEncoder,b::BitPat)
 
 end
 export decode

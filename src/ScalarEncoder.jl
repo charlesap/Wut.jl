@@ -24,6 +24,8 @@ struct ScalarEncoder <: AbstractEncoder
 
         res = rad = rag = 0.0
     
+        pad = padding > 0 ? padding : ( periodic ? 0 : convert(Int64,round((w-1)/2)) )
+    
         if n != 0 && radius == 0.0 && resolution == 0.0 
            res = periodic ? (maxval-minval)/n : (maxval-minval)/(n-w)
            rad = w*res
@@ -43,11 +45,11 @@ struct ScalarEncoder <: AbstractEncoder
     
         if n == 0
             rag = periodic ? maxval-minval : maxval-minval+res
-            nfloat = w * (rag / rad) + 2 * padding
+            nfloat = (w * (rag / rad)) + (2 * pad)
             n = Int32(ceil(nfloat))        
         end
     
-        pad = periodic ? 0 : convert(Int64,round((w-1)/2))
+        #pad = periodic ? 0 : convert(Int64,round((w-1)/2))
     
         new(w,minval,maxval,periodic,n,rad,res,name,verbosity,clipInput,forced,pad,rag)
     end
