@@ -97,9 +97,20 @@ end
 export getWidth
 
 function getDescription(e::DateEncoder)
-    e.name
+    @sprintf("%s%s%s%s%s%s",
+        isnull(e.sE)?"":@sprintf(" %s %i","season",e.sEo),
+        isnull(e.dE)?"":@sprintf(" %s %i","day of week",e.dEo),
+        isnull(e.wE)?"":@sprintf(" %s %i","weekend",e.wEo),
+        isnull(e.cE)?"":@sprintf(" %s %i","custom days",e.cEo),
+        isnull(e.hE)?"":@sprintf(" %s %i","holiday",e.hEo),    
+        isnull(e.tE)?"":@sprintf(" %s %i","time of day",e.tEo))    
 end
 export getDescription
+
+function getName(e::DateEncoder)
+    e.name
+end
+export getName
 
 function getBucketIndices(e::DateEncoder)
 
@@ -142,10 +153,10 @@ function encodeIntoArray(e::DateEncoder,d::DateTime,b::BitPat;learn=true, offset
 end
 export encodeIntoArray
 
-function decode(e::DateEncoder)
-
-end
-export decode
+#function decode(e::DateEncoder, b::BitPat; parentFieldName="")
+#
+#end
+#export decode
 
 function getBucketValues(e::DateEncoder)
 

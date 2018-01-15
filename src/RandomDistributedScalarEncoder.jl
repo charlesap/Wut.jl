@@ -27,7 +27,9 @@ mutable struct RandomDistributedScalarEncoder  <: AbstractEncoder
         rng=MersenneTwister(seed)
         t=shuffle(Vector(1:n))
         bm[minIndex]=t[1:w]
-        new(w,minIndex,maxIndex,offset,0,n,resolution,name,verbosity,mao,rng,bm,0,INITIAL_BUCKETS)
+        nm = (name != "") ? name : @sprintf("[%s]" , resolution)
+
+        new(w,minIndex,maxIndex,offset,0,n,resolution,nm,verbosity,mao,rng,bm,0,INITIAL_BUCKETS)
     end
 
 end
@@ -42,6 +44,11 @@ function getDescription(e::RandomDistributedScalarEncoder)
     e.name
 end
 export getDescription
+
+function getName(e::RandomDistributedScalarEncoder)
+    e.name
+end
+export getName
 
 function repOK(e::RandomDistributedScalarEncoder,v::Vector)
    true 
@@ -129,10 +136,10 @@ function encodeIntoArray(e::RandomDistributedScalarEncoder,n::Number,b::BitPat;l
 end
 export encodeIntoArray
 
-function decode(e::RandomDistributedScalarEncoder)
-
-end
-export decode
+#function decode(e::RandomDistributedScalarEncoder, b::BitPat; parentFieldName="")
+#
+#end
+#export decode
 
 function getBucketValues(e::RandomDistributedScalarEncoder)
 

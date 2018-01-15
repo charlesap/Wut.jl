@@ -50,8 +50,9 @@ struct ScalarEncoder <: AbstractEncoder
         end
     
         #pad = periodic ? 0 : convert(Int64,round((w-1)/2))
+        nm = (name != "") ? name : @sprintf("[%s:%s]" , minval, maxval)
     
-        new(w,minval,maxval,periodic,n,rad,res,name,verbosity,clipInput,forced,pad,rag)
+        new(w,minval,maxval,periodic,n,rad,res,nm,verbosity,clipInput,forced,pad,rag)
     end
 
 end
@@ -66,6 +67,11 @@ function getDescription(e::ScalarEncoder)
     e.name
 end
 export getDescription
+
+function getName(e::ScalarEncoder)
+    e.name
+end
+export getName
 
 function getBucketIndices(e::ScalarEncoder)
 
@@ -94,10 +100,10 @@ function encodeIntoArray(e::ScalarEncoder,n::Number,b::BitPat;learn=true, offset
 end
 export encodeIntoArray
 
-function decode(e::ScalarEncoder)
-
-end
-export decode
+#function decode(e::ScalarEncoder, b::BitPat; parentFieldName="")
+#
+#end
+#export decode
 
 function getBucketValues(e::ScalarEncoder)
 
