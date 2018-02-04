@@ -1,5 +1,13 @@
+#/usr/bin/env julia
+
 using Wut
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+# Run tests
+
+tic()
+
+@time @test include("ScalarEncoderTests.jl")
+@time @test include("RandomDistributedScalarEncoderTests.jl")
+
+toc()

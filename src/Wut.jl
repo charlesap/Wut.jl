@@ -46,7 +46,7 @@ function decode(e::AbstractEncoder, b::BitPat; parentFieldName="")
     
     parentName = (parentFieldName == "") ? getName(e) : @sprintf("%s.%s", parentFieldName, getName(e))
     x=Dict(parentName => [])
-    (x,[parentName])
+    ("abstract",x,[parentName])
 end
 export decode
 
